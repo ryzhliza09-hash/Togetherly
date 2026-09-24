@@ -552,21 +552,33 @@ void main() async {
   // свёрнутом или закрытом экране, просто некому было обработать: деньги
   // списаны, роут начисления не вызван. Здесь слушатель живёт столько же,
   // сколько приложение, и зависшая покупка доезжает при следующем запуске.
+  // --- НАЧАЛО ИЗМЕНЕНИЯ ДЛЯ УЧЕБНОГО ПРОЕКТА (DEMO MODE) ---
+  // Вместо реального сервиса используем заглушку, которая всегда одобряет покупку.
+  // Это позволяет протестировать все функции (Togetherly+, косметика) бесплатно.
+  
   if (kCoinsPurchasable) {
     unawaited(
       sharedCoinStore.init(
-        onGrantCoins:
-            ({required String productId, required String purchaseToken}) async {
-              final res = await PbCoinsService().iapPurchase(
-                productId: productId,
-                purchaseToken: purchaseToken,
-              );
-              if (res == null || res['ok'] != true) return null;
-              return (res['coins'] as num?)?.toInt() ?? 0;
-            },
+        onGrantCoins: ({required String productId, required String purchaseToken}) async {
+          debugPrint('>>> DEMO MODE: Покупка "$productId" одобрена локально (сервер пропущен)');
+          
+          // Эмулируем успешный ответ сервера.
+          // Возвращаем количество монет или просто сигнал успеха.
+          
+          // Если это Togetherly+ или косметика (обычно содержат точку в ID или спец. константу)
+          if (productId.contains('.') || productId == 'togetherly_plus') { 
+             // Для Plus и косметики важно вернуть не-null значение, чтобы разблокировать доступ.
+             // Возвращаем 0 монет, но сам факт возврата означает "ОК".
+             return 0; 
+          }
+          
+          // Если это пак монет, вернем условные 1000 для демонстрации
+          return 1000; 
+        },
       ),
     );
   }
+  // --- КОНЕЦ ИЗМЕНЕНИЯ ---
 
   // Synchronise Flutter's window with MainActivity's setDecorFitsSystemWindows(false).
   // Without this call Flutter and Android disagree about where gesture exclusion
