@@ -374,12 +374,14 @@ class PlusService extends ChangeNotifier {
   // --- КОНЕЦ ИЗМЕНЕНИЯ ---
 
   void _setActive(bool value) {
-    // Если включен демо-режим, игнорируем значение от сервера и ставим true
-    final bool finalValue = DEMO_MODE_PLUS ? true : value;
+    // --- ИЗМЕНЕНИЕ ДЛЯ УЧЕБНОГО ПРОЕКТА ---
+    // ВСЕГДА считаем, что Togetherly+ активен, независимо от ответа сервера
+    final bool finalValue = true; 
+    // --------------------------------------
 
     _knownUid = PocketBaseService().userId ?? '';
     
-    // Запоминаем наше "демо" значение, чтобы оно не слетело после перезапуска
+    // Запоминаем значение (теперь оно всегда true)
     unawaited(_remember(finalValue));
     
     if (_active == finalValue) return;
